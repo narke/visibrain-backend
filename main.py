@@ -93,19 +93,28 @@ async def get_game_id(game_name: str):
         raise HTTPException(status_code=response.status_code, detail="Error while getting game ID from Twitch")
 
 @app.get("/api/search-videos")
-async def search_videos(game_id: str):
-    url = f'https://api.twitch.tv/helix/videos?game_id={game_id}&first=10'
+async def search_videos(game_id: str, first: int = 10, after: str = None):
+    url = f'https://api.twitch.tv/helix/videos'
     headers = {
         'Client-ID': CLIENT_ID,
         'Authorization': f'Bearer {ACCESS_TOKEN}'
     }
 
-    response = requests.get(url, headers=headers)
+    params = {
+            'game_id': game_id,
+            'first': first
+    }
+
+    if after:
+        params['after'] = after
+
+    response = requests.get(url, headers=headers, params=params)
 
     if response.status_code == 200:
         data = response.json()
         videos = data.get('data', [])
-        return JSONResponse(content={"videos": videos})
+        pagination = data.get('pagination', {})
+        return JSONResponse(content={"videos": videos, "pagination": pagination})
     else:
         raise HTTPException(status_code=response.status_code, detail="Error while getting videos from Twitch")
 
