@@ -22,9 +22,15 @@ MONGO_URI = os.getenv("MONGO_URI")
 app = FastAPI()
 
 # Handle CORS
+origins = [
+    "http://localhost",
+    "http://localhost:80",   # Prod
+    "http://localhost:5173", # Dev
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[f"{FRONTEND_URL}"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
